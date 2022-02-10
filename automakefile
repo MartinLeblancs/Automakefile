@@ -1,0 +1,206 @@
+##
+## EPITECH PROJECT, 2020
+## automakefile
+## File description:
+## automakefile
+##
+
+#!/bin/sh
+
+if [ $# != 1 ]
+then
+	exit 84
+fi
+if [ ! -f $1 ]
+then
+     exit 84
+fi
+
+file=$1
+IFS=";"
+count=0
+i=0
+
+##################
+## SET VARIABLE ##
+##################
+
+while read line || [ -n "$line" ]
+do
+	args=($line)
+	if [ ${args[0]} == "PROJECT_DIR" ]; then
+		proj_dir=${args[1]}
+		if [ "${proj_dir:${#proj_dir}-1:1}" == "/" ]; then
+            proj_dir="${proj_dir:0:${#proj_dir}-1}"
+        fi
+	elif [ ${args[0]} == "SOURCES_DIR" ]; then
+		src_dir=${args[1]}
+		if [ "${src_dir:${#src_dir}-1:1}" == "/" ]; then
+             src_dir="${src_dir:0:${#src_dir}-1}"
+        fi
+	elif [ ${args[0]} == "HEADERS_DIR" ]; then
+		headers_dir=${args[1]}
+		if [ "${headers_dir:${#headers_dir}-1:1}" == "/" ]; then
+            headers_dir="${headers_dir:0:${#headers_dir}-1}"
+        fi
+	elif [ ${args[0]} == "LIBS_DIR" ]; then
+		lib_dir=${args[1]}
+		if [ "${lib_dir:${#lib_dir}-1:1}" == "/" ]; then
+            lib_dir="${lib_dir:0:${#lib_dir}-1}"
+        fi
+	elif [ ${args[0]} == "EXEC" ]; then
+		exe_name=${args[1]}
+	elif [ ${args[0]} == "CC" ]; then
+		compil=${args[1]}
+	elif [ ${args[0]} == "CFLAGS" ]; then
+		compil_flags=${args[1]}
+	elif [ ${args[0]} == "LDFLAGS" ]; then
+		ld_flags=${args[1]}
+	elif [ ${args[0]} == "BCK_DIR" ]; then
+		bck_folder=${args[1]}
+		if [ "${bck_folder:${#bck_folder}-1:1}" == "/" ]; then
+            bck_folder="${bck_folder:0:${#bck_folder}-1}"
+        fi
+	elif [ ${args[0]} == "ZIP" ]; then
+		compression_binary=${args[1]}
+	elif [ ${args[0]} == "ZIPFLAGS" ]; then
+		compression_flags=${args[1]}
+	elif [ ${args[0]} == "UNZIP" ]; then
+		decompression_binary=${args[1]}
+	elif [ ${args[0]} == "UNZIPFLAGS" ]; then
+		decompression_flags=${args[1]}
+   elif [[ ${args[0]} == *.c ]]
+   		then
+   			sources[count]=${args[0]}
+   			hd_src[count]=${args[1]}
+   			((count++))
+fi
+done < $file
+count=0
+echo ${hd_src[1]}
+##################
+## CHECK ERRORS ##
+##################
+
+if [ -z $proj_dir ]
+then
+    exit 84
+fi
+if [ -z ${sources[0]} ]
+then
+    exit 84
+fi
+if [ -e $proj_dir/Makefile ]
+then
+    echo -e "The file "Makefile" already existed, he was deleted"
+    rm $proj_dir/Makefile
+fi
+
+###################
+## ECHO MAKEFILE ##
+###################
+
+##################################
+## DISPLAY VARIABLE IN MAKEFILE ##
+##################################
+
+if [ -n "$compil" ]; then echo -ne "CC= $compil\n";  echo -e ""; fi >> $proj_dir/Makefile
+if [ -z "$compil" ]; then echo -e "CC= gcc\n"; fi >> $proj_dir/Makefile
+if [ -n "$exe_name" ]; then echo "NAME= $exe_name"; echo -e ""; fi >> $proj_dir/Makefile
+if [ -z "$exe_name" ]; then echo "NAME= a.out"; echo -e ""; fi >> $proj_dir/Makefile
+if [ -n "$compil_flags" ]; then echo "CFLAGS= $compil_flags"; echo -e ""; fi >> $proj_dir/Makefile
+if [ "$src_dir" == "." ]; then echo -e "src_dir=""\n"; fi >> $proj_dir/Makefile
+if [ -n "$headers_dir" ]; then echo -e "HD_DIR= $headers_dir\n"; fi >> $proj_dir/Makefile
+if [ -n "$src_dir" ]; then echo -e "SRCS_DIR= $src_dir\n"; fi >> $proj_dir/Makefile
+if [ -n "compression_binary" ]; then echo -e "BCK_NAME= backup\n"; fi >> $proj_dir/Makefile
+echo -e "RM= rm -Rf\n" >> $proj_dir/Makefile
+echo -e "VERSION= 1_0\n" >> $proj_dir/Makefile
+echo -ne "SRC= " >> $proj_dir/Makefile
+while [ "${sources[count]}" != "" ]
+do
+    echo -ne "\t${sources[count]} \\" >> $proj_dir/Makefile
+    echo -e "" >> $proj_dir/Makefile
+    ((count++))
+done
+echo -e "" >> $proj_dir/Makefile
+if [ -n "$lib_dir" ];then echo -e "LIBS= $lib_dir\n"; fi >> $proj_dir/Makefile
+echo -e "OBJ= *.o\n" >> $proj_dir/Makefile
+if [ -n "$bck_folder" ]; then echo -e "BCK= $bck_folder\n"; fi >> $proj_dir/Makefile
+if [ -n "$compression_binary" ]; then echo -e "ZIP= $compression_binary\n"; fi >> $proj_dir/Makefile
+if [ -z "$compression_binary" ]; then echo -e "ZIP= tar\n"; fi >> $proj_dir/Makefile
+if [ -n "$compression_flags" ]; then echo -e "ZIPFLAGS= $compression_flags\n"; fi >> $proj_dir/Makefile
+if [ -z "$compression_flags" ]; then echo -e "ZIPFLAGS= -cvvf\n"; fi >> $proj_dir/Makefile
+if [ -n "$decompression_binary" ]; then echo -e "UNZIP= $decompression_binary\n"; fi >> $proj_dir/Makefile
+if [ -z "$decompression_binary" ]; then echo -e "UNZIP= tar\n"; fi >> $proj_dir/Makefile
+if [ -n "$decompression_flags" ]; then echo -e "UNZIPFLAGS= $decompression_flags\n"; fi >> $proj_dir/Makefile
+if [ -z "$decompression_flags" ]; then echo -e "UNZIPFLAGS= -xvf\n"; fi >> $proj_dir/Makefile
+if [ -n "$ld_flags" ]; then echo "LDFLAGS = $ld_flags"; echo -e ""; fi >> $proj_dir/Makefile
+
+######################
+## EXECUTE MAKEFILE ##
+######################
+
+echo "all: build" >> $proj_dir/Makefile
+echo -e "" >> $proj_dir/Makefile
+echo -e "build:" >> $proj_dir/Makefile
+if [ -n "$lib_dir" ]; then echo -e "\t\$(CC) -c \$(LIBS)/*.c"; fi >> $proj_dir/Makefile
+if [ -n "$lib_dir" ]; then echo -e "\tar rc libmy.a \$(OBJ)"; fi >> $proj_dir/Makefile
+echo -ne "\t\$(CC) " >> $proj_dir/Makefile
+if [ -n "$compil_flags" ]; then echo -n "\$(CFLAGS) "; fi >> $proj_dir/Makefile
+if [ -n "$headers_dir" ]; then echo -ne "-I \$(HD_DIR)/ "; fi >> $proj_dir/Makefile
+if [ -n "$src_dir" ]; then
+count=0
+while [ "${sources[count]}" != "" ]
+do
+    echo -n "-include " >> $proj_dir/Makefile
+    echo -n "${hd_src[count]} " >> $proj_dir/Makefile
+    echo -n "\$(SRCS_DIR)/" >> $proj_dir/Makefile
+    echo -ne "${sources[count]} " >> $proj_dir/Makefile
+    ((count++))
+done
+else
+    echo -ne "\$(SRC) " >> $proj_dir/Makefile
+fi
+if [ -n "$lib_dir" ]; then echo -n "libmy.a"; fi >> $proj_dir/Makefile
+if [ -n "$exe_name" ]; then echo -ne " -o \$(NAME) "; fi >> $proj_dir/Makefile
+if [ -n "$ld_flags" ]; then echo -ne "\$(LDFLAGS)\n\n"; fi  >> $proj_dir/Makefile
+echo -ne "\n\narchive:\n" >> $proj_dir/Makefile
+if [ -n "$bck_folder" ]; then echo -ne "\tmkdir \$(BCK)\n"; fi  >> $proj_dir/Makefile
+echo -ne "\t\$(ZIP) \$(ZIPFLAGS) \$(BCK_NAME).\$(ZIP) ">> $proj_dir/Makefile
+if [ -n "$src_dir" ]; then
+count=0
+while [ "${sources[count]}" != "" ]
+do
+    echo -n "\$(SRCS_DIR)/" >> $proj_dir/Makefile
+    echo -ne "${sources[count]} " >> $proj_dir/Makefile
+    ((count++))
+done
+else
+echo -ne "\$(SRC) " >> $proj_dir/Makefile
+fi
+if [ -n "$lib_dir" ]; then echo -ne "\$(LIBS)/"; fi >> $proj_dir/Makefile
+echo -e "*.c" >> $proj_dir/Makefile
+if [ -n "$bck_folder" ]; then echo -ne "\tmv \$(BCK_NAME).\$(ZIP) \$(BCK)/\n"; fi  >> $proj_dir/Makefile
+if [ -n "compression_binary" ]; then echo -ne "\t"; fi >> $proj_dir/Makefile
+echo -n "@echo -ne \"\$(BCK_NAME) file generated\n\"" >> $proj_dir/Makefile
+echo -ne "\nrevert:\n" >> $proj_dir/Makefile
+echo -ne "\t\$(UNZIP) \$(UNZIPFLAGS) " >> $proj_dir/Makefile
+if [ -n "$bck_folder" ]; then echo -ne "\$(BCK)/"; fi >> $proj_dir/Makefile
+echo -ne "\$(BCK_NAME).\$(ZIP)\n\n" >> $proj_dir/Makefile
+echo -ne "delete:\n" >> $proj_dir/Makefile
+if [ -n "$bck_folder" ]; then echo -ne "\trm -Rf \$(BCK)/\n\n"; fi >> $proj_dir/Makefile
+echo -ne "\trm -Rf \$(BCK_NAME).\$(ZIP)\n\n" >> $proj_dir/Makefile
+echo "clean:" >> $proj_dir/Makefile
+echo -e "\t\$(RM) \$(OBJ)" >> $proj_dir/Makefile
+echo -e "num:" >> $proj_dir/Makefile
+echo -e "\t@echo -e \$(VERSION)\n" >> $proj_dir/Makefile
+echo "fclean: clean" >> $proj_dir/Makefile
+echo -e "\t\$(RM) \$(NAME)" >> $proj_dir/Makefile
+echo -e "\t\$(RM) *.gcno" >> $proj_dir/Makefile
+echo -e "\t\$(RM) libmy.a" >> $proj_dir/Makefile
+echo -e "\t\$(RM) $headers_dir/*.gch\n" >> $proj_dir/Makefile
+echo "re: fclean all" >> $proj_dir/Makefile
+
+echo -e "Makefile was created"
+
+exit 0
